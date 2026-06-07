@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: #111827;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* CLOCK */
+.clock-box {
+    font-size: 12px;
+    color: #22c55e;
+    line-height: 1.4;
+}
+
+/* TITLE */
+.title {
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* BUTTONS */
+.actions button {
+    margin-left: 5px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.actions button:hover {
+    transform: scale(1.05);
+}
+
+/* CARDS */
+.cards {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+}
+
+.card {
+    flex: 1;
+    background: #1f2937;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 20px;
+    transition: 0.3s;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background: #273549;
+}
+
+.card span {
+    font-size: 15px;
+    color: #cbd5e1;
+}
+
+/* GRAPH CONTAINER */
+.container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.box {
+    flex: 1;
+    background: #1f2937;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.box h3 {
+    margin-bottom: 20px;
+}
+
+/* TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #111827;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+}
+
+tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+/* POPUP */
+.info-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: white;
+    border-radius: 20px;
+    padding: 25px;
+    z-index: 999;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    animation: popupAnim 0.4s ease;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.popup-header h2 {
+    color: #38bdf8;
+}
+
+.close-btn {
+    font-size: 24px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close-btn:hover {
+    color: red;
+    transform: scale(1.2);
+}
+
+.popup-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.info-card {
+    background: rgba(255,255,255,0.05);
+    padding: 18px;
+    border-radius: 15px;
+    transition: 0.4s;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.info-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    background: rgba(56,189,248,0.1);
+    box-shadow: 0 0 20px rgba(56,189,248,0.4);
+}
+
+.info-card h3 {
+    color: #38bdf8;
+}
+
+.info-card p {
+    color: #d1d5db;
+    line-height: 1.7;
+}
+
+.formula-btn {
+    margin-top: 10px;
+    background: linear-gradient(45deg,#38bdf8,#0ea5e9);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.formula-btn:hover {
+    transform: scale(1.05);
+}
+
+.formula-box {
+    margin-top: 12px;
+    background: rgba(255,255,255,0.06);
+    padding: 12px;
+    border-radius: 10px;
+    color: #facc15;
+    border-left: 4px solid #38bdf8;
+}
+
+.info-overlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 998;
+}
+
+@keyframes popupAnim {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.info-popup::-webkit-scrollbar {
+    width: 8px;
+}
+
+.info-popup::-webkit-scrollbar-thumb {
+    background: #38bdf8;
+    border-radius: 10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+
+    <div class="clock-box">
+        <div id="time"></div>
+        <div id="date"></div>
+    </div>
+
+    <div class="title">AI FINGERPRINT DASHBOARD</div>
+
+    <div class="actions">
+
+        <button onclick="showInfo()">Info</button>
+
+        
+
+        <a href="/reset_dashboard" onclick="return confirmReset(event)">
+            <button style="background:red;color:white;">Reset</button>
+        </a>
+
+<script>
+function confirmReset(event) {
+    let ok = confirm("Do you really want to reset? This will delete all data.");
+    if (!ok) {
+        event.preventDefault();
+        return false;
+    }
+    return true;
+}
+</script>
+
+        <a href="/download">
+            <button style="background:green;color:white;">Download</button>
+        </a>
+
+    </div>
+
+</div>
+
+<!-- CARDS -->
+<div class="cards">
+
+    <div class="card">
+        <span>Total</span><br>
+        {{ total }}
+    </div>
+
+    <div class="card">
+        <span>Real</span><br>
+        {{ real }}
+    </div>
+
+    <div class="card">
+        <span>Fake</span><br>
+        {{ fake }}
+    </div>
+
+    <div class="card">
+        <span>Accuracy</span><br>
+        {{ accuracy }}%
+    </div>
+
+    <div class="card">
+        <span>FAR</span><br>
+        {{ far }}%
+    </div>
+
+    <div class="card">
+        <span>FRR</span><br>
+        {{ frr }}%
+    </div>
+
+</div>
+
+<!-- CHARTS -->
+<div class="container">
+
+    <div class="box">
+        <h3>Weekly Prediction</h3>
+        <canvas id="weekChart"></canvas>
+    </div>
+
+    <div class="box">
+        <h3>FAR vs FRR Trend</h3>
+        <canvas id="barChart"></canvas>
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="box" style="margin:20px;">
+
+    <h3>Recent Activity</h3>
+
+    <table>
+
+        <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Result</th>
+            <th>Confidence</th>
+            <th>Time</th>
+            <th>Action</th>
+        </tr>
+
+        {% for row in recent %}
+
+        <tr>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[5] }}</td>
+
+            <td>
+                <a href="/send/{{ row[0] }}" style="color:#38bdf8;">Send</a>
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+<!-- OVERLAY -->
+<div class="info-overlay" id="overlay" onclick="hideInfo()"></div>
+
+<!-- POPUP -->
+<div id="infoBox" class="info-popup">
+
+    <div class="popup-header">
+        <h2>Fingerprint Prediction Dashboard</h2>
+        <span onclick="hideInfo()" class="close-btn">✖</span>
+    </div>
+
+    <div class="popup-content">
+
+        <div class="info-card">
+            <h3>Dashboard Overview</h3>
+            <p>
+                This AI Dashboard uses Deep Learning and Artificial Intelligence
+                to classify fingerprint images as REAL or FAKE.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Total Predictions</h3>
+            <p>
+                Displays total fingerprint images processed by the system.
+                total=real+fake
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Accuracy</h3>
+            <p>
+                Accuracy shows how correctly the model predicts results.
+            </p>
+
+            <button class="formula-btn">Accuracy Formula</button>
+
+            <div class="formula-box">
+                Accuracy =
+                (Correct Predictions / Total Predictions) × 100
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>FAR (False Acceptance Rate)</h3>
+
+            <p>
+                FAR measures fake fingerprints incorrectly accepted as REAL.
+            </p>
+
+            <button class="formula-btn">FAR Formula</button>
+
+            <div class="formula-box">
+                FAR =
+                (False Accepted / Total Fake Attempts) × 100
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>FRR (False Rejection Rate)</h3>
+
+            <p>
+                FRR measures genuine fingerprints incorrectly rejected.
+            </p>
+
+            <button class="formula-btn">FRR Formula</button>
+
+            <div class="formula-box">
+                FRR =
+                (False Rejected / Genuine Attempts) × 100
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>Weekly Prediction Graph</h3>
+            <p>
+                Displays weekly REAL and FAKE prediction analytics.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>FAR vs FRR Graph</h3>
+            <p>
+                Compares system security and reliability using line graph analytics.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Download Option</h3>
+            <p>
+                Allows users to download prediction reports and dashboard analytics.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Reset Option</h3>
+            <p>
+                Clears dashboard data, graphs and prediction records.
+            </p>
+        </div>
+
+        <div class="info-card">
+            <h3>Send Option</h3>
+            <p>
+                Sends prediction results and reports directly.
+            </p>
+        </div>
+
+    
+
+    </div>
+
+</div>
+
+<script>
+
+/* CLOCK */
+function updateClock() {
+
+    const now = new Date();
+
+    document.getElementById("time").innerHTML =
+        now.toLocaleTimeString([], {
+            hour:'2-digit',
+            minute:'2-digit'
+        });
+
+    document.getElementById("date").innerHTML =
+        now.toLocaleDateString([], {
+            weekday:'short',
+            day:'numeric',
+            month:'short'
+        });
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+/* POPUP */
+function showInfo() {
+    document.getElementById("infoBox").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+}
+
+function hideInfo() {
+    document.getElementById("infoBox").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+}
+function confirmReset() {
+
+    let result = confirm(
+        "Reset Dashboard?\n\nThis will delete all prediction data, graphs and activity records.\n\nClick OK to continue or Cancel to stop."
+    );
+
+    if(result) {
+
+        window.location.href = "/reset_dashboard";
+    }
+}
+/* FAR FRR LINE GRAPH */
+new Chart(document.getElementById('barChart'), {
+
+    type: 'line',
+
+    data: {
+
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+
+        datasets: [
+
+            {
+                label: "FAR",
+
+                data: [20, 25, 28, 30, {{ far }}],
+
+                borderColor: "orange",
+                backgroundColor: "orange",
+                tension: 0.4,
+                fill: false,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            },
+
+            {
+                label: "FRR",
+
+                data: [15, 22, 35, 38, {{ frr }}],
+
+                borderColor: "#ffb347",
+                backgroundColor: "#ffb347",
+                tension: 0.4,
+                fill: false,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }
+        ]
+    },
+
+    options: {
+
+        responsive: true,
+
+        plugins: {
+            legend: {
+                labels: {
+                    color: "white"
+                }
+            }
+        },
+
+        scales: {
+
+            x: {
+                ticks: {
+                    color: "white"
+                },
+
+                grid: {
+                    color: "rgba(255,255,255,0.1)"
+                }
+            },
+
+            y: {
+
+                beginAtZero: true,
+
+                max: 100,
+
+                ticks: {
+                    color: "white"
+                },
+
+                grid: {
+                    color: "rgba(255,255,255,0.1)"
+                }
+            }
+        }
+    }
+});
+
+/* WEEKLY BAR GRAPH */
+new Chart(document.getElementById('weekChart'), {
+
+    type: 'bar',
+
+    data: {
+
+        labels: {{ week_labels | tojson }},
+
+        datasets: [
+
+            {
+                label: "REAL",
+                data: {{ real_week | tojson }},
+                backgroundColor: '#3b82f6'
+            },
+
+            {
+                label: "FAKE",
+                data: {{ fake_week | tojson }},
+                backgroundColor: '#ec4899'
+            }
+        ]
+    },
+
+    options: {
+
+        responsive: true,
+
+        plugins: {
+            legend: {
+                labels: {
+                    color: 'white'
+                }
+            }
+        },
+
+        scales: {
+
+            x: {
+                ticks: {
+                    color: 'white'
+                },
+
+                grid: {
+                    color: 'rgba(255,255,255,0.1)'
+                }
+            },
+
+            y: {
+                beginAtZero: true,
+
+                ticks: {
+                    color: 'white'
+                },
+
+                grid: {
+                    color: 'rgba(255,255,255,0.1)'
+                }
+            }
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>

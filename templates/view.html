@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Details</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI';
+            color: white;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            margin-top: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #111827;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .info {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .images {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .images img {
+            border-radius: 10px;
+            width: 300px;
+            border: 2px solid #374151;
+        }
+
+        .result-real {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .result-fake {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+
+        .send-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .back-btn {
+            background: #6b7280;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Prediction Details</h2>
+
+    <div class="card">
+
+        <div class="info"><b>User:</b> {{ username }}</div>
+        <div class="info"><b>Email:</b> {{ email }}</div>
+
+        <div class="info">
+            <b>Result:</b>
+            {% if result == "REAL" %}
+                <span class="result-real">REAL</span>
+            {% else %}
+                <span class="result-fake">FAKE</span>
+            {% endif %}
+        </div>
+
+        <div class="info"><b>Date & Time:</b> {{ time }}</div>
+
+        <div class="info"><b>FAR:</b> {{ far }}%</div>
+        <div class="info"><b>FRR:</b> {{ frr }}%</div>
+
+        <div class="images">
+            <div>
+                <p>Original Image</p>
+                <img src="/{{ image_path }}">
+            </div>
+
+            <div>
+                <p>Heatmap</p>
+                <img src="/{{ heatmap_path }}">
+            </div>
+        </div>
+
+        <!-- SEND EMAIL -->
+        <form action="/send_email" method="POST">
+            <input type="hidden" name="email" value="{{ email }}">
+            <input type="hidden" name="username" value="{{ username }}">
+            <input type="hidden" name="result" value="{{ result }}">
+            <input type="hidden" name="confidence" value="{{ confidence }}">
+            <input type="hidden" name="image_path" value="{{ image_path }}">
+            
+            <button type="submit" class="btn send-btn">Send Email</button>
+        </form>
+
+        <!-- BACK BUTTON -->
+        <a href="/dashboard" class="btn back-btn">⬅ Back to Dashboard</a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

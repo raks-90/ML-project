@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fingerprint AI System</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background: url("https://images.unsplash.com/photo-1518770660439-4636190af475") no-repeat center/cover;
+            color: white;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            z-index: -1;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            color: #38bdf8;
+            margin-bottom: 30px;
+        }
+
+        .menu button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #1e293b;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .menu button:hover {
+            background: #38bdf8;
+            color: black;
+            transform: translateX(8px);
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            width: 420px;
+            padding: 25px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {opacity:0; transform: translateY(20px);}
+            to {opacity:1; transform: translateY(0);}
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button.action {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(45deg, #38bdf8, #0ea5e9);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button.action:hover {
+            transform: scale(1.05);
+        }
+
+        img {
+            margin-top: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .progress {
+            background: #334155;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: black;
+            font-weight: bold;
+        }
+
+        .real { background: #22c55e; }
+        .fake { background: #ef4444; }
+
+        .error {
+            color: #f87171;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>🛂 Fingerprint AI</h2>
+
+    <div class="menu">
+        
+        <button onclick="showSection('info')">ℹ Info</button>
+        <button onclick="window.location.href='/camera'">📷 Webcam</button>
+        <button onclick="window.location.href='/dashboard'">📊 Dashboard</button>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- UPLOAD -->
+    <div id="upload" class="card">
+
+        <h3>Upload Fingerprint</h3>
+
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+
+            <select name="actual" required>
+                <option value="">Select Actual</option>
+                <option value="REAL">REAL</option>
+                <option value="FAKE">FAKE</option>
+            </select>
+
+            <button type="submit" class="action">Predict</button>
+        </form>
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        {% if prediction %}
+
+        <h2 style="color: {% if prediction=='REAL' %}#22c55e{% else %}#ef4444{% endif %}">
+            {{ prediction }}
+        </h2>
+
+        <p><b>{{ confidence }}%</b></p>
+
+        <div class="progress">
+            <div class="progress-bar {% if prediction=='REAL' %}real{% else %}fake{% endif %}"
+                 style="width: {{ confidence }}%">
+                {{ confidence }}%
+            </div>
+        </div>
+
+        <img src="{{ url_for('static', filename=image_path.split('static/')[-1]) }}" width="260">
+
+        <!-- 🔥 HEATMAP -->
+        {% if heatmap_path %}
+        <button class="action" onclick="toggleHeatmap()">🔥 Show Heatmap</button>
+
+        <div id="heatmapBox" style="display:none;">
+            <img src="{{ heatmap_path }}" width="260">
+        </div>
+        
+        {% endif %}
+        <button class="action" onclick="location.href='/home'">🔁 Replay</button>
+        
+
+        {% endif %}
+        
+
+    </div>
+
+    <!-- INFO -->
+    <div id="info" class="card" style="display:none;">
+
+        <h3>🔍 How It Works</h3>
+
+        <p>
+            This system uses a CNN-based deep learning model to classify fingerprints.
+        </p>
+
+        <ul style="text-align:left; margin-top:10px;">
+            <li><b>REAL:</b> Genuine fingerprint</li>
+            <li><b>FAKE:</b> Spoof or artificial fingerprint</li>
+            <li><b>Confidence:</b> Model certainty</li>
+        </ul>
+
+        <p style="margin-top:10px;">
+            Higher confidence means more reliable prediction.
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+
+function showSection(section) {
+    document.getElementById("upload").style.display = "none";
+    document.getElementById("info").style.display = "none";
+
+    document.getElementById(section).style.display = "block";
+}
+
+function toggleHeatmap() {
+    let box = document.getElementById("heatmapBox");
+
+    if (box.style.display === "none") {
+        box.style.display = "block";
+    } else {
+        box.style.display = "none";
+    }
+}
+
+</script>
+<script>
+
+function replay(){
+    // Hide result
+    document.getElementById("resultBox").style.display = "none";
+
+    // Show upload form again
+    document.getElementById("uploadBox").style.display = "block";
+}
+
+</script>
+
+</body>
+</html>

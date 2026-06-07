@@ -1,0 +1,227 @@
+<!-- 
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 15px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #38bdf8;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+        }
+
+        a {
+            color: #38bdf8;
+            display: block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Register</h2>
+
+    <form method="POST">
+        <input name="username" placeholder="Username" required>
+        <input name="password" type="password" placeholder="Password" required>
+        <button>Register</button>
+    </form>
+
+    <a href="/login">Already have account? Login</a>
+</div>
+
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Registration | Fingerprint AI System</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #0b1220;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+            color: #38bdf8;
+            font-size: 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            background: #1e293b;
+        }
+
+        .navbar a:hover {
+            background: #38bdf8;
+            color: black;
+        }
+
+        /* Center */
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 35px;
+            border-radius: 15px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            border: 1px solid #334155;
+        }
+
+        .card h2 {
+            color: #38bdf8;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            width: 95%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #38bdf8;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+        }
+
+        .link {
+            display: block;
+            margin-top: 15px;
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background: #0b1220;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <h2>🛂 Fingerprint Authentication Portal</h2>
+    <div>
+        <a href="/login">Login</a>
+        <a href="/">Home</a>
+    </div>
+</div>
+
+<!-- REGISTER FORM -->
+<div class="container">
+    <div class="card">
+    <h2>📝 Create Account</h2>
+
+    {% if error %}
+        <p style="color:red; margin-bottom:10px;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <input name="username" placeholder="Enter Username" required>
+        <input name="password" type="password" placeholder="Enter Password" required>
+        <input name="email" type="email" placeholder="Email" required>
+        <button type="submit">Register</button>
+    </form>
+
+    <a class="link" href="/login">Already have an account? Login</a>
+</div>
+
+
+
+</body>
+</html>
+
+
